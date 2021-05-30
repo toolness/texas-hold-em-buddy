@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Value {
     Numeral(u8),
     Jack,
@@ -9,7 +9,7 @@ pub enum Value {
     Ace
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Suit {
     Clubs,
     Diamonds,
@@ -40,10 +40,10 @@ const ALL_SUITS: [Suit; 4] = [
     Suit::Spades,
 ];
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Card {
-    value: Value,
-    suit: Suit,
+    pub value: Value,
+    pub suit: Suit,
 }
 
 impl Card {
@@ -75,10 +75,30 @@ impl From<&Value> for u8 {
 
 impl PartialOrd for Value {
     fn partial_cmp(&self, other: &Value) -> Option<Ordering> {
+        Some(self.cmp(&other))
+    }
+}
+
+impl Ord for Value {
+    fn cmp(&self, other: &Value) -> Ordering {
         let my_value = u8::from(self);
         let other_value = u8::from(other);
 
-        Some(my_value.cmp(&other_value))
+        my_value.cmp(&other_value)
+    }
+}
+
+impl PartialOrd for Card {
+    fn partial_cmp(&self, other: &Card) -> Option<Ordering> {
+        Some(self.cmp(&other))
+    }
+}
+
+impl Ord for Card {
+    fn cmp(&self, other: &Card) -> Ordering {
+        // Note that we're only comparing the card's value and
+        // ignoring the suit.
+        self.value.cmp(&other.value)
     }
 }
 
