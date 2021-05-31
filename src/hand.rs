@@ -11,3 +11,9 @@ impl From<Vec<Card>> for Hand {
         Hand { cards }
     }
 }
+
+impl Into<Vec<Card>> for Hand {
+    fn into(self) -> Vec<Card> {
+        self.cards
+    }
+}
