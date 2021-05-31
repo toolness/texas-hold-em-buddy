@@ -11,5 +11,5 @@ fn main() {
     let hand = "kd ac 2s".parse::<Hand>().unwrap();
     println!("Here's a random number: {}", r.next_float());
     println!("Here's a deck with {} cards: {:?}", deck.len(), deck);
-    println!("Here's a hand: {:?}", hand);
+    println!("Here's a hand: {}", hand);
 }

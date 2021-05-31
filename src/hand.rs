@@ -1,3 +1,5 @@
+use std::fmt;
+
 use super::card::Card;
 
 #[derive(Debug)]
@@ -23,5 +25,13 @@ impl std::str::FromStr for Hand {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Hand::from(Card::try_vec_from(s)?))
+    }
+}
+
+impl fmt::Display for Hand {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let cards_vec: Vec<String> = self.cards.iter().map(|card| format!("{}", card)).collect();
+
+        write!(f, "{}", cards_vec.join(", "))
     }
 }
