@@ -3,7 +3,15 @@ use std::fmt;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Value {
-    Numeral(u8),
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
     Jack,
     King,
     Queen,
@@ -19,15 +27,15 @@ pub enum Suit {
 }
 
 const ALL_VALUES: [Value; 13] = [
-    Value::Numeral(2),
-    Value::Numeral(3),
-    Value::Numeral(4),
-    Value::Numeral(5),
-    Value::Numeral(6),
-    Value::Numeral(7),
-    Value::Numeral(8),
-    Value::Numeral(9),
-    Value::Numeral(10),
+    Value::Two,
+    Value::Three,
+    Value::Four,
+    Value::Five,
+    Value::Six,
+    Value::Seven,
+    Value::Eight,
+    Value::Nine,
+    Value::Ten,
     Value::Jack,
     Value::King,
     Value::Queen,
@@ -44,11 +52,7 @@ pub struct Card {
 
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Value::Numeral(x) = self {
-            write!(f, "{}", x)
-        } else {
-            write!(f, "{:?}", self)
-        }
+        write!(f, "{:?}", self)
     }
 }
 
@@ -89,16 +93,17 @@ impl std::str::FromStr for Card {
             "Q" | "q" => Value::Queen,
             "K" | "k" => Value::King,
             "A" | "a" => Value::Ace,
+            "2" => Value::Two,
+            "3" => Value::Three,
+            "4" => Value::Four,
+            "5" => Value::Five,
+            "6" => Value::Six,
+            "7" => Value::Seven,
+            "8" => Value::Eight,
+            "9" => Value::Nine,
+            "10" => Value::Ten,
             _ => {
-                if let Ok(number) = value_str.parse::<u8>() {
-                    if number >= 2 && number <= 10 {
-                        Value::Numeral(number)
-                    } else {
-                        return Err("Numeric value out of range");
-                    }
-                } else {
-                    return Err("Invalid value");
-                }
+                return Err("Invalid value");
             }
         };
 
@@ -150,7 +155,15 @@ impl Card {
 impl From<&Value> for u8 {
     fn from(value: &Value) -> u8 {
         match value {
-            Value::Numeral(x) => *x,
+            Value::Two => 2,
+            Value::Three => 3,
+            Value::Four => 4,
+            Value::Five => 5,
+            Value::Six => 6,
+            Value::Seven => 7,
+            Value::Eight => 8,
+            Value::Nine => 9,
+            Value::Ten => 10,
             Value::Jack => 11,
             Value::Queen => 12,
             Value::King => 13,
@@ -199,23 +212,20 @@ mod tests {
     fn test_cmp_works() {
         assert!(Ace > Jack);
         assert!(Jack < Queen);
-        assert!(Jack > Numeral(10));
+        assert!(Jack > Ten);
     }
 
     #[test]
     fn test_display_works() {
         assert_eq!(
-            format!("{}", Card::new(Numeral(12), Clubs)),
-            String::from("12 of Clubs")
+            format!("{}", Card::new(Seven, Clubs)),
+            String::from("Seven of Clubs")
         )
     }
 
     #[test]
     fn test_parse_works() {
-        assert_eq!(
-            "10h".parse::<Card>().unwrap(),
-            Card::new(Numeral(10), Hearts),
-        );
+        assert_eq!("10h".parse::<Card>().unwrap(), Card::new(Ten, Hearts),);
 
         assert_eq!("kd".parse::<Card>().unwrap(), Card::new(King, Diamonds));
     }
@@ -224,7 +234,7 @@ mod tests {
     fn try_vec_from_works() {
         assert_eq!(
             Card::try_vec_from("2s qc").unwrap(),
-            vec![Card::new(Numeral(2), Spades), Card::new(Queen, Clubs),]
+            vec![Card::new(Two, Spades), Card::new(Queen, Clubs),]
         );
     }
 }
