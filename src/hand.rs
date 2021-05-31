@@ -45,7 +45,7 @@ impl From<Vec<Card>> for Hand {
 }
 
 impl Hand {
-    pub fn get_highest_value(&self) -> Option<Value> {
+    pub fn highest_value(&self) -> Option<Value> {
         if self.cards.len() == 0 {
             None
         } else {
@@ -87,8 +87,8 @@ mod tests {
     }
 
     #[test]
-    fn test_get_highest_value_works() {
-        assert_eq!(hand("").get_highest_value(), None);
-        assert_eq!(hand("2s ah 4d").get_highest_value(), Some(Value::Ace));
+    fn test_highest_value_works() {
+        assert_eq!(hand("").highest_value(), None);
+        assert_eq!(hand("2s ah 4d").highest_value(), Some(Value::Ace));
     }
 }
