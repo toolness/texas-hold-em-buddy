@@ -155,6 +155,11 @@ impl Hand {
     pub fn full_house(&self) -> Option<(Value, Value)> {
         match self.grouped_by_n_of_a_kind.as_slice() {
             [.., (2, pair_value, _), (3, triplet_value, _)] => Some((*triplet_value, *pair_value)),
+            // On a 7-card Texas Hold-Em "hand", we might actually have *two* triplets, which
+            // we should "downgrade" to a full house.
+            [.., (3, lower_triplet, _), (3, higher_triplet, _)] => {
+                Some((*higher_triplet, *lower_triplet))
+            }
             _ => None,
         }
     }
@@ -259,10 +264,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_full_house_handles_double_triplets() {
-        // TODO: On a 7-card "hand", we might actually have *two* triplets, which
-        // this doesn't handle properly. We should handle it!
         assert_eq!(
             hand("2s 2d 2h 3h 3d 3c").full_house(),
             Some((Value::Three, Value::Two))
