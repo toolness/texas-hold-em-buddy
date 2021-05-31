@@ -4,6 +4,19 @@ use std::fmt;
 
 use super::card::{Card, Suit, Value};
 
+#[derive(PartialOrd, PartialEq)]
+enum Category {
+    HighCard(Value),
+    OnePair(Value),
+    TwoPair(Value),
+    ThreeOfAKind(Value),
+    Straight(Value),
+    Flush(Value),
+    FullHouse(Value, Value),
+    FourOfAKind(Value),
+    StraightFlush(Value),
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct Hand {
     cards: Vec<Card>,
@@ -134,7 +147,7 @@ impl fmt::Display for Hand {
 #[cfg(test)]
 mod tests {
     use super::super::card::Value;
-    use super::Hand;
+    use super::{Category, Hand};
 
     fn hand(value: &'static str) -> Hand {
         value.parse::<Hand>().unwrap()
@@ -167,5 +180,14 @@ mod tests {
     #[test]
     fn test_ord_works_for_high_cards() {
         assert!(hand("2h as") > hand("kd qs"));
+    }
+
+    #[test]
+    fn test_category_enum_orders_as_expected() {
+        assert!(Category::StraightFlush(Value::Two) > Category::FourOfAKind(Value::Two));
+        assert!(
+            Category::FullHouse(Value::Three, Value::Four)
+                > Category::FullHouse(Value::Three, Value::Two)
+        );
     }
 }
