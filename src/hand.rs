@@ -4,7 +4,9 @@ use std::fmt;
 
 use super::card::{Card, Suit, Value};
 
-#[derive(Debug, PartialOrd, PartialEq)]
+#[derive(Debug, PartialOrd, PartialEq, Eq, Ord)]
+/// This is ordered as per the listing here:
+/// https://en.wikipedia.org/wiki/List_of_poker_hands
 pub enum Category {
     HighCard(Value),
     OnePair(Value),
@@ -43,8 +45,14 @@ impl Ord for Hand {
             if other.is_empty() {
                 Ordering::Greater
             } else {
-                // TODO: Actually compare hands as per the ranking
-                // outlined at https://en.wikipedia.org/wiki/List_of_poker_hands.
+                let best = self.find_best_category().expect("Hand is non-empty");
+                let other_best = other.find_best_category().expect("Hand is non-empty");
+
+                let best_cmp = best.cmp(&other_best);
+
+                if best_cmp != Ordering::Equal {
+                    return best_cmp;
+                }
 
                 // It looks like the two hands are tied, so we'll try to break the
                 // tie by seeing if one has a higher card.
@@ -153,6 +161,7 @@ impl Hand {
     }
 
     pub fn find_best_category(&self) -> Option<Category> {
+        // TODO: Need to process Straight, Flush, and StraightFlush!
         if let Some(value) = self.four_of_a_kind() {
             Some(Category::FourOfAKind(value))
         } else if let Some((triplet_value, pair_value)) = self.full_house() {
@@ -237,6 +246,13 @@ mod tests {
         assert!(hand("2h as") > hand("kd qs"));
         assert!(hand("as kd") > hand("qd as"));
         assert!(hand("as").cmp(&hand("ah")) == Ordering::Equal);
+    }
+
+    #[test]
+    fn test_ord_works_for_two_pairs() {
+        assert!(hand("3h 3s") > hand("2h 2s"));
+        assert!(hand("3h 3s") > hand("kh qd"));
+        assert!(hand("3h 3s").cmp(&hand("3d 3c")) == Ordering::Equal);
     }
 
     #[test]
