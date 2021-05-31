@@ -6,7 +6,7 @@ const MULTIPLIER: u64 = 1664525;
 const INCREMENT: u64 = 1013904223;
 
 pub struct Random {
-    pub seed: u64
+    pub seed: u64,
 }
 
 impl Random {

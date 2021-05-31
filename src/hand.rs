@@ -2,7 +2,7 @@ use super::card::Card;
 
 #[derive(Debug)]
 pub struct Hand {
-    cards: Vec<Card>
+    cards: Vec<Card>,
 }
 
 impl From<Vec<Card>> for Hand {

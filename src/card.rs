@@ -7,7 +7,7 @@ pub enum Value {
     Jack,
     King,
     Queen,
-    Ace
+    Ace,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -31,15 +31,10 @@ const ALL_VALUES: [Value; 13] = [
     Value::Jack,
     Value::King,
     Value::Queen,
-    Value::Ace
+    Value::Ace,
 ];
 
-const ALL_SUITS: [Suit; 4] = [
-    Suit::Clubs,
-    Suit::Diamonds,
-    Suit::Hearts,
-    Suit::Spades,
-];
+const ALL_SUITS: [Suit; 4] = [Suit::Clubs, Suit::Diamonds, Suit::Hearts, Suit::Spades];
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Card {
@@ -87,7 +82,7 @@ impl std::str::FromStr for Card {
             return Err("String must contain value and suit");
         }
 
-        let value_str = &s[0..s.len()-1];
+        let value_str = &s[0..s.len() - 1];
 
         let value = match value_str {
             "J" | "j" => Value::Jack,
@@ -129,7 +124,10 @@ impl Card {
 
         for suit in ALL_SUITS.iter() {
             for value in ALL_VALUES.iter() {
-                result.push(Card { suit: *suit, value: *value });
+                result.push(Card {
+                    suit: *suit,
+                    value: *value,
+                });
             }
         }
 
@@ -206,7 +204,13 @@ mod tests {
     #[test]
     fn test_display_works() {
         assert_eq!(
-            format!("{}", Card { suit: Clubs, value: Numeral(12) }),
+            format!(
+                "{}",
+                Card {
+                    suit: Clubs,
+                    value: Numeral(12)
+                }
+            ),
             String::from("12 of Clubs")
         )
     }
@@ -215,12 +219,18 @@ mod tests {
     fn test_parse_works() {
         assert_eq!(
             "10h".parse::<Card>().unwrap(),
-            Card { suit: Hearts, value: Numeral(10) }
+            Card {
+                suit: Hearts,
+                value: Numeral(10)
+            }
         );
 
         assert_eq!(
             "kd".parse::<Card>().unwrap(),
-            Card { suit: Diamonds, value: King }
+            Card {
+                suit: Diamonds,
+                value: King
+            }
         );
     }
 
@@ -229,8 +239,14 @@ mod tests {
         assert_eq!(
             Card::try_vec_from("2s qc").unwrap(),
             vec![
-                Card { suit: Spades, value: Numeral(2) },
-                Card { suit: Clubs, value: Queen },
+                Card {
+                    suit: Spades,
+                    value: Numeral(2)
+                },
+                Card {
+                    suit: Clubs,
+                    value: Queen
+                },
             ]
         );
     }

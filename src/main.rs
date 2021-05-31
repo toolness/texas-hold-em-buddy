@@ -1,6 +1,6 @@
-mod random;
 mod card;
 mod hand;
+mod random;
 
 fn main() {
     use card::Card;
