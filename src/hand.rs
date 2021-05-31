@@ -45,9 +45,16 @@ impl Ord for Hand {
             } else {
                 // TODO: Actually compare hands as per the ranking
                 // outlined at https://en.wikipedia.org/wiki/List_of_poker_hands.
-                self.highest_value()
-                    .unwrap()
-                    .cmp(&other.highest_value().unwrap())
+
+                // It looks like the two hands are tied, so we'll try to break the
+                // tie by seeing if one has a higher card.
+                for (card, other_card) in self.cards.iter().rev().zip(other.cards.iter().rev()) {
+                    let cmp = card.cmp(other_card);
+                    if cmp != Ordering::Equal {
+                        return cmp;
+                    }
+                }
+                Ordering::Equal
             }
         }
     }
@@ -180,6 +187,7 @@ mod tests {
     #[test]
     fn test_ord_works_for_high_cards() {
         assert!(hand("2h as") > hand("kd qs"));
+        assert!(hand("as kd") > hand("qd as"));
     }
 
     #[test]
