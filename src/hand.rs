@@ -4,11 +4,11 @@ use std::fmt;
 
 use super::card::{Card, Suit, Value};
 
-#[derive(PartialOrd, PartialEq)]
-enum Category {
+#[derive(Debug, PartialOrd, PartialEq)]
+pub enum Category {
     HighCard(Value),
     OnePair(Value),
-    TwoPair(Value),
+    TwoPair(Value, Value),
     ThreeOfAKind(Value),
     Straight(Value),
     Flush(Value),
@@ -124,6 +124,52 @@ impl Hand {
         }
     }
 
+    pub fn three_of_a_kind(&self) -> Option<Value> {
+        match self.grouped_by_n_of_a_kind.as_slice() {
+            [.., (3, value, _)] => Some(*value),
+            _ => None,
+        }
+    }
+
+    pub fn one_pair(&self) -> Option<Value> {
+        match self.grouped_by_n_of_a_kind.as_slice() {
+            [.., (2, value, _)] => Some(*value),
+            _ => None,
+        }
+    }
+
+    pub fn full_house(&self) -> Option<(Value, Value)> {
+        match self.grouped_by_n_of_a_kind.as_slice() {
+            [.., (2, pair_value, _), (3, triplet_value, _)] => Some((*triplet_value, *pair_value)),
+            _ => None,
+        }
+    }
+
+    pub fn two_pair(&self) -> Option<(Value, Value)> {
+        match self.grouped_by_n_of_a_kind.as_slice() {
+            [.., (2, lower_pair, _), (2, higher_pair, _)] => Some((*higher_pair, *lower_pair)),
+            _ => None,
+        }
+    }
+
+    pub fn find_best_category(&self) -> Option<Category> {
+        if let Some(value) = self.four_of_a_kind() {
+            Some(Category::FourOfAKind(value))
+        } else if let Some((triplet_value, pair_value)) = self.full_house() {
+            Some(Category::FullHouse(triplet_value, pair_value))
+        } else if let Some(value) = self.three_of_a_kind() {
+            Some(Category::ThreeOfAKind(value))
+        } else if let Some((higher_pair, lower_pair)) = self.two_pair() {
+            Some(Category::TwoPair(higher_pair, lower_pair))
+        } else if let Some(value) = self.one_pair() {
+            Some(Category::OnePair(value))
+        } else if let Some(value) = self.highest_value() {
+            Some(Category::HighCard(value))
+        } else {
+            None
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.cards.is_empty()
     }
@@ -199,6 +245,34 @@ mod tests {
         assert!(
             Category::FullHouse(Value::Three, Value::Four)
                 > Category::FullHouse(Value::Three, Value::Two)
+        );
+    }
+
+    #[test]
+    fn test_find_best_category_works() {
+        assert_eq!(
+            hand("2h kd").find_best_category(),
+            Some(Category::HighCard(Value::King))
+        );
+
+        assert_eq!(
+            hand("2h 2d").find_best_category(),
+            Some(Category::OnePair(Value::Two))
+        );
+
+        assert_eq!(
+            hand("2h 3h 2d 3c").find_best_category(),
+            Some(Category::TwoPair(Value::Three, Value::Two))
+        );
+
+        assert_eq!(
+            hand("2h 3h 2d 3c 3s").find_best_category(),
+            Some(Category::FullHouse(Value::Three, Value::Two))
+        );
+
+        assert_eq!(
+            hand("5s 5h 5c 5d").find_best_category(),
+            Some(Category::FourOfAKind(Value::Five))
         );
     }
 }
