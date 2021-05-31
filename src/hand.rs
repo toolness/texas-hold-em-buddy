@@ -17,3 +17,11 @@ impl Into<Vec<Card>> for Hand {
         self.cards
     }
 }
+
+impl std::str::FromStr for Hand {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Hand::from(Card::try_vec_from(s)?))
+    }
+}
