@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::fmt;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Value {
@@ -44,6 +45,28 @@ const ALL_SUITS: [Suit; 4] = [
 pub struct Card {
     pub value: Value,
     pub suit: Suit,
+}
+
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Value::Numeral(x) = self {
+            write!(f, "{}", x)
+        } else {
+            write!(f, "{:?}", self)
+        }
+    }
+}
+
+impl fmt::Display for Suit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl fmt::Display for Card {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} of {}", self.value, self.suit)
+    }
 }
 
 impl Card {
@@ -102,11 +125,22 @@ impl Ord for Card {
     }
 }
 
-#[cfg(Test)]
+#[cfg(test)]
 mod tests {
+    use super::*;
+
+    #[test]
     fn test_cmp_works() {
         assert!(Value::Ace > Value::Jack);
         assert!(Value::Jack < Value::Queen);
         assert!(Value::Jack > Value::Numeral(10));
+    }
+
+    #[test]
+    fn test_display_works() {
+        assert_eq!(
+            format!("{}", Card { suit: Suit::Clubs, value: Value::Numeral(12) }),
+            String::from("12 of Clubs")
+        )
     }
 }
