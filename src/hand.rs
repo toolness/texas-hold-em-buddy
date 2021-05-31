@@ -180,16 +180,22 @@ impl Hand {
 
     pub fn straight(&self) -> Option<Value> {
         let mut latest: Option<(Value, u8, usize)> = None;
+        let mut has_ace = false;
 
         for (value, _) in self.grouped_by_values.iter().rev() {
+            if *value == Value::Ace {
+                has_ace = true;
+            }
             let num_value = u8::from(value);
-            if let Some((high_value, prev_num_value, run)) = latest {
+            if let Some((high_value, prev_num_value, run_len)) = latest {
                 if num_value + 1 == prev_num_value {
-                    let new_run = run + 1;
-                    if new_run == 5 {
+                    let new_run_len = run_len + 1;
+                    let is_straight_with_ace_low =
+                        new_run_len == 4 && *value == Value::Two && has_ace;
+                    if new_run_len == 5 || is_straight_with_ace_low {
                         return Some(high_value);
                     }
-                    latest = Some((high_value, num_value, new_run));
+                    latest = Some((high_value, num_value, new_run_len));
                     continue;
                 }
             }
@@ -322,7 +328,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_straight_works_with_ace_low() {
         assert_eq!(hand("as 2s 3h 4d 5h").straight(), Some(Value::Five));
     }
