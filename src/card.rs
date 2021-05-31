@@ -41,7 +41,7 @@ const ALL_SUITS: [Suit; 4] = [
     Suit::Spades,
 ];
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Card {
     pub value: Value,
     pub suit: Suit,
@@ -66,6 +66,12 @@ impl fmt::Display for Suit {
 impl fmt::Display for Card {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} of {}", self.value, self.suit)
+    }
+}
+
+impl fmt::Debug for Card {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Card {{ {} }}", self)
     }
 }
 
