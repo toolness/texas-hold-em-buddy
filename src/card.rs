@@ -114,20 +114,21 @@ impl std::str::FromStr for Card {
             }
         };
 
-        Ok(Card { value, suit })
+        Ok(Card::new(value, suit))
     }
 }
 
 impl Card {
+    pub fn new(value: Value, suit: Suit) -> Self {
+        Card { value, suit }
+    }
+
     pub fn new_deck() -> Vec<Self> {
         let mut result: Vec<Self> = Vec::new();
 
         for suit in ALL_SUITS.iter() {
             for value in ALL_VALUES.iter() {
-                result.push(Card {
-                    suit: *suit,
-                    value: *value,
-                });
+                result.push(Card::new(*value, *suit));
             }
         }
 
@@ -204,13 +205,7 @@ mod tests {
     #[test]
     fn test_display_works() {
         assert_eq!(
-            format!(
-                "{}",
-                Card {
-                    suit: Clubs,
-                    value: Numeral(12)
-                }
-            ),
+            format!("{}", Card::new(Numeral(12), Clubs)),
             String::from("12 of Clubs")
         )
     }
@@ -219,35 +214,17 @@ mod tests {
     fn test_parse_works() {
         assert_eq!(
             "10h".parse::<Card>().unwrap(),
-            Card {
-                suit: Hearts,
-                value: Numeral(10)
-            }
+            Card::new(Numeral(10), Hearts),
         );
 
-        assert_eq!(
-            "kd".parse::<Card>().unwrap(),
-            Card {
-                suit: Diamonds,
-                value: King
-            }
-        );
+        assert_eq!("kd".parse::<Card>().unwrap(), Card::new(King, Diamonds));
     }
 
     #[test]
     fn try_vec_from_works() {
         assert_eq!(
             Card::try_vec_from("2s qc").unwrap(),
-            vec![
-                Card {
-                    suit: Spades,
-                    value: Numeral(2)
-                },
-                Card {
-                    suit: Clubs,
-                    value: Queen
-                },
-            ]
+            vec![Card::new(Numeral(2), Spades), Card::new(Queen, Clubs),]
         );
     }
 }
