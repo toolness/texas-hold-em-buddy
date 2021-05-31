@@ -192,19 +192,21 @@ impl Ord for Card {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::Card;
+    use super::Suit::*;
+    use super::Value::*;
 
     #[test]
     fn test_cmp_works() {
-        assert!(Value::Ace > Value::Jack);
-        assert!(Value::Jack < Value::Queen);
-        assert!(Value::Jack > Value::Numeral(10));
+        assert!(Ace > Jack);
+        assert!(Jack < Queen);
+        assert!(Jack > Numeral(10));
     }
 
     #[test]
     fn test_display_works() {
         assert_eq!(
-            format!("{}", Card { suit: Suit::Clubs, value: Value::Numeral(12) }),
+            format!("{}", Card { suit: Clubs, value: Numeral(12) }),
             String::from("12 of Clubs")
         )
     }
@@ -213,12 +215,12 @@ mod tests {
     fn test_parse_works() {
         assert_eq!(
             "10h".parse::<Card>().unwrap(),
-            Card { suit: Suit::Hearts, value: Value::Numeral(10) }
+            Card { suit: Hearts, value: Numeral(10) }
         );
 
         assert_eq!(
             "kd".parse::<Card>().unwrap(),
-            Card { suit: Suit::Diamonds, value: Value::King }
+            Card { suit: Diamonds, value: King }
         );
     }
 
@@ -227,8 +229,8 @@ mod tests {
         assert_eq!(
             Card::try_vec_from("2s qc").unwrap(),
             vec![
-                Card { suit: Suit::Spades, value: Value::Numeral(2) },
-                Card { suit: Suit::Clubs, value: Value::Queen },
+                Card { suit: Spades, value: Numeral(2) },
+                Card { suit: Clubs, value: Queen },
             ]
         );
     }
