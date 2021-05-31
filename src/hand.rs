@@ -34,7 +34,7 @@ impl From<Vec<Card>> for Hand {
         }
 
         let mut grouped_by_values = values.into_iter().collect::<Vec<_>>();
-        grouped_by_values.sort_by(|(a, _), (b, _)| a.cmp(b));
+        grouped_by_values.sort_unstable_by(|(a, _), (b, _)| a.cmp(b));
 
         Hand {
             cards,
