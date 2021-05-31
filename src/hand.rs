@@ -252,6 +252,24 @@ mod tests {
     }
 
     #[test]
+    fn test_full_house_works() {
+        assert_eq!(hand("").full_house(), None);
+        assert_eq!(
+            hand("2s 2d 2h 3h 3d").full_house(),
+            Some((Value::Two, Value::Three))
+        );
+    }
+
+    #[test]
+    fn test_two_pair_works() {
+        assert_eq!(hand("").two_pair(), None);
+        assert_eq!(
+            hand("2s 2d 3h 3d").two_pair(),
+            Some((Value::Three, Value::Two))
+        );
+    }
+
+    #[test]
     fn test_flush_works() {
         assert_eq!(hand("").flush(), None);
         assert_eq!(hand("kh 3h 2h 7h 5h").flush(), Some(()));
