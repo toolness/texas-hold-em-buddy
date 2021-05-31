@@ -99,14 +99,9 @@ impl Hand {
     }
 
     pub fn four_of_a_kind(&self) -> Option<Value> {
-        if let Some((len, v, _)) = self.grouped_by_n_of_a_kind.last() {
-            if *len == 4 {
-                Some(*v)
-            } else {
-                None
-            }
-        } else {
-            None
+        match self.grouped_by_n_of_a_kind.as_slice() {
+            [.., (4, value, _)] => Some(*value),
+            _ => None,
         }
     }
 
