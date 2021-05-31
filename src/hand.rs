@@ -44,6 +44,17 @@ impl From<Vec<Card>> for Hand {
     }
 }
 
+impl Hand {
+    pub fn get_highest_value(&self) -> Option<Value> {
+        if self.cards.len() == 0 {
+            None
+        } else {
+            let (v, _) = self.grouped_by_values[self.grouped_by_values.len() - 1];
+            Some(v)
+        }
+    }
+}
+
 impl Into<Vec<Card>> for Hand {
     fn into(self) -> Vec<Card> {
         self.cards
@@ -63,5 +74,21 @@ impl fmt::Display for Hand {
         let cards_vec: Vec<String> = self.cards.iter().map(|card| format!("{}", card)).collect();
 
         write!(f, "{}", cards_vec.join(", "))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::super::card::Value;
+    use super::Hand;
+
+    fn hand(value: &'static str) -> Hand {
+        value.parse::<Hand>().unwrap()
+    }
+
+    #[test]
+    fn test_get_highest_value_works() {
+        assert_eq!(hand("").get_highest_value(), None);
+        assert_eq!(hand("2s ah 4d").get_highest_value(), Some(Value::Ace));
     }
 }
