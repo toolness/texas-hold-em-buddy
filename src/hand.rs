@@ -7,7 +7,7 @@ use super::card::{Card, Suit, Value};
 #[derive(Debug, Eq, PartialEq)]
 pub struct Hand {
     cards: Vec<Card>,
-    grouped_by_value_lengths: Vec<(usize, Value, Vec<Card>)>,
+    grouped_by_n_of_a_kind: Vec<(usize, Value, Vec<Card>)>,
     grouped_by_values: Vec<(Value, Vec<Card>)>,
     grouped_by_suits: Vec<(Suit, Vec<Card>)>,
 }
@@ -66,11 +66,11 @@ impl From<Vec<Card>> for Hand {
         let mut grouped_by_values = values.into_iter().collect::<Vec<_>>();
         grouped_by_values.sort_unstable_by(|(a, _), (b, _)| a.cmp(b));
 
-        let mut grouped_by_value_lengths = grouped_by_values
+        let mut grouped_by_n_of_a_kind = grouped_by_values
             .iter()
             .map(|(value, cards)| (cards.len(), *value, cards.clone()))
             .collect::<Vec<_>>();
-        grouped_by_value_lengths.sort_unstable_by(|(a_len, a_val, _), (b_len, b_val, _)| {
+        grouped_by_n_of_a_kind.sort_unstable_by(|(a_len, a_val, _), (b_len, b_val, _)| {
             let len_cmp = a_len.cmp(b_len);
 
             if len_cmp == Ordering::Equal {
@@ -83,7 +83,7 @@ impl From<Vec<Card>> for Hand {
         Hand {
             cards,
             grouped_by_values,
-            grouped_by_value_lengths,
+            grouped_by_n_of_a_kind,
             grouped_by_suits: suits.into_iter().collect::<Vec<_>>(),
         }
     }
@@ -99,7 +99,7 @@ impl Hand {
     }
 
     pub fn four_of_a_kind(&self) -> Option<Value> {
-        if let Some((len, v, _)) = self.grouped_by_value_lengths.last() {
+        if let Some((len, v, _)) = self.grouped_by_n_of_a_kind.last() {
             if *len == 4 {
                 Some(*v)
             } else {
