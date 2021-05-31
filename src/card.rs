@@ -135,6 +135,17 @@ impl Card {
 
         result
     }
+
+    pub fn try_vec_from<T: AsRef<str>>(value: T) -> Result<Vec<Self>, &'static str> {
+        let mut result = vec![];
+        let s = value.as_ref();
+
+        for card_str in s.split_ascii_whitespace() {
+            result.push(card_str.parse::<Card>()?);
+        }
+
+        Ok(result)
+    }
 }
 
 impl From<&Value> for u8 {
@@ -208,6 +219,17 @@ mod tests {
         assert_eq!(
             "kd".parse::<Card>().unwrap(),
             Card { suit: Suit::Diamonds, value: Value::King }
+        );
+    }
+
+    #[test]
+    fn try_vec_from_works() {
+        assert_eq!(
+            Card::try_vec_from("2s qc").unwrap(),
+            vec![
+                Card { suit: Suit::Spades, value: Value::Numeral(2) },
+                Card { suit: Suit::Clubs, value: Value::Queen },
+            ]
         );
     }
 }
