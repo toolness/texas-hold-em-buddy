@@ -178,14 +178,37 @@ impl Hand {
         }
     }
 
+    pub fn straight(&self) -> Option<Value> {
+        let mut latest: Option<(Value, u8, usize)> = None;
+
+        for (value, _) in self.grouped_by_values.iter().rev() {
+            let num_value = u8::from(value);
+            if let Some((high_value, prev_num_value, run)) = latest {
+                if num_value + 1 == prev_num_value {
+                    let new_run = run + 1;
+                    if new_run == 5 {
+                        return Some(high_value);
+                    }
+                    latest = Some((high_value, num_value, new_run));
+                    continue;
+                }
+            }
+            latest = Some((*value, num_value, 1));
+        }
+
+        None
+    }
+
     pub fn find_best_category(&self) -> Option<Category> {
-        // TODO: Need to process Straight and StraightFlush!
+        // TODO: Need to process StraightFlush!
         if let Some(value) = self.four_of_a_kind() {
             Some(Category::FourOfAKind(value))
         } else if let Some((triplet_value, pair_value)) = self.full_house() {
             Some(Category::FullHouse(triplet_value, pair_value))
         } else if self.flush().is_some() {
             Some(Category::Flush)
+        } else if let Some(value) = self.straight() {
+            Some(Category::Straight(value))
         } else if let Some(value) = self.three_of_a_kind() {
             Some(Category::ThreeOfAKind(value))
         } else if let Some((higher_pair, lower_pair)) = self.two_pair() {
@@ -288,6 +311,23 @@ mod tests {
     }
 
     #[test]
+    fn test_straight_works() {
+        assert_eq!(hand("").straight(), None);
+        assert_eq!(hand("2s 3h 4d 5h 6s").straight(), Some(Value::Six));
+    }
+
+    #[test]
+    fn test_straight_works_with_ace_high() {
+        assert_eq!(hand("10s jd qc kh as").straight(), Some(Value::Ace));
+    }
+
+    #[test]
+    #[ignore]
+    fn test_straight_works_with_ace_low() {
+        assert_eq!(hand("as 2s 3h 4d 5h").straight(), Some(Value::Five));
+    }
+
+    #[test]
     fn test_ord_works_for_empty_hands() {
         assert!(hand("as") > hand(""));
         assert!(hand("") < hand("kh"));
@@ -334,6 +374,16 @@ mod tests {
         assert_eq!(
             hand("2h 3h 2d 3c").find_best_category(),
             Some(Category::TwoPair(Value::Three, Value::Two))
+        );
+
+        assert_eq!(
+            hand("2h 3h 4s 5c 6h").find_best_category(),
+            Some(Category::Straight(Value::Six))
+        );
+
+        assert_eq!(
+            hand("2h 3h 4h kh 10h").find_best_category(),
+            Some(Category::Flush)
         );
 
         assert_eq!(
