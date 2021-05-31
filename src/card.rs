@@ -75,6 +75,54 @@ impl fmt::Debug for Card {
     }
 }
 
+impl std::str::FromStr for Card {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if !s.is_ascii() {
+            return Err("String must be ASCII");
+        }
+
+        if s.len() < 2 {
+            return Err("String must contain value and suit");
+        }
+
+        let value_str = &s[0..s.len()-1];
+
+        let value = match value_str {
+            "J" | "j" => Value::Jack,
+            "Q" | "q" => Value::Queen,
+            "K" | "k" => Value::King,
+            "A" | "a" => Value::Ace,
+            _ => {
+                if let Ok(number) = value_str.parse::<u8>() {
+                    if number >= 2 && number <= 10 {
+                        Value::Numeral(number)
+                    } else {
+                        return Err("Numeric value out of range");
+                    }
+                } else {
+                    return Err("Invalid value");
+                }
+            }
+        };
+
+        let suit_str = &s[s.len() - 1..s.len()];
+
+        let suit = match suit_str {
+            "C" | "c" => Suit::Clubs,
+            "D" | "d" => Suit::Diamonds,
+            "H" | "h" => Suit::Hearts,
+            "S" | "s" => Suit::Spades,
+            _ => {
+                return Err("Invalid suit");
+            }
+        };
+
+        Ok(Card { value, suit })
+    }
+}
+
 impl Card {
     pub fn new_deck() -> Vec<Self> {
         let mut result: Vec<Self> = Vec::new();
@@ -148,5 +196,18 @@ mod tests {
             format!("{}", Card { suit: Suit::Clubs, value: Value::Numeral(12) }),
             String::from("12 of Clubs")
         )
+    }
+
+    #[test]
+    fn test_parse_works() {
+        assert_eq!(
+            "10h".parse::<Card>().unwrap(),
+            Card { suit: Suit::Hearts, value: Value::Numeral(10) }
+        );
+
+        assert_eq!(
+            "kd".parse::<Card>().unwrap(),
+            Card { suit: Suit::Diamonds, value: Value::King }
+        );
     }
 }
