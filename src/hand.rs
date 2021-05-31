@@ -10,7 +10,11 @@ pub struct Hand {
     grouped_by_suits: Vec<(Suit, Vec<Card>)>,
 }
 
-fn append_to<K: std::hash::Hash + Eq>(key: K, value: Card, map: &mut HashMap<K, Vec<Card>>) {
+fn append_to_hashmap_vec<K: std::hash::Hash + Eq, V>(
+    key: K,
+    value: V,
+    map: &mut HashMap<K, Vec<V>>,
+) {
     if let Some(arr) = map.get_mut(&key) {
         arr.push(value);
     } else {
@@ -25,8 +29,8 @@ impl From<Vec<Card>> for Hand {
         let mut suits: HashMap<Suit, Vec<Card>> = HashMap::new();
 
         for card in cards.iter() {
-            append_to(card.value, *card, &mut values);
-            append_to(card.suit, *card, &mut suits);
+            append_to_hashmap_vec(card.value, *card, &mut values);
+            append_to_hashmap_vec(card.suit, *card, &mut suits);
         }
 
         let mut grouped_by_values = values.into_iter().collect::<Vec<_>>();
