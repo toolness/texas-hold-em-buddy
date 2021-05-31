@@ -153,6 +153,8 @@ impl fmt::Display for Hand {
 
 #[cfg(test)]
 mod tests {
+    use std::cmp::Ordering;
+
     use super::super::card::Value;
     use super::{Category, Hand};
 
@@ -181,13 +183,14 @@ mod tests {
     fn test_ord_works_for_empty_hands() {
         assert!(hand("as") > hand(""));
         assert!(hand("") < hand("kh"));
-        assert!(hand("").cmp(&hand("")) == std::cmp::Ordering::Equal);
+        assert!(hand("").cmp(&hand("")) == Ordering::Equal);
     }
 
     #[test]
     fn test_ord_works_for_high_cards() {
         assert!(hand("2h as") > hand("kd qs"));
         assert!(hand("as kd") > hand("qd as"));
+        assert!(hand("as").cmp(&hand("ah")) == Ordering::Equal);
     }
 
     #[test]
