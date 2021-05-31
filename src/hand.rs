@@ -13,7 +13,7 @@ pub enum Category {
     TwoPair(Value, Value),
     ThreeOfAKind(Value),
     Straight(Value),
-    Flush(Value),
+    Flush,
     FullHouse(Value, Value),
     FourOfAKind(Value),
     StraightFlush(Value),
@@ -24,7 +24,7 @@ pub struct Hand {
     cards: Vec<Card>,
     grouped_by_n_of_a_kind: Vec<(usize, Value, Vec<Card>)>,
     grouped_by_values: Vec<(Value, Vec<Card>)>,
-    grouped_by_suits: Vec<(Suit, Vec<Card>)>,
+    grouped_by_suits: Vec<(usize, Suit, Vec<Card>)>,
 }
 
 impl PartialOrd for Hand {
@@ -91,6 +91,12 @@ impl From<Vec<Card>> for Hand {
             append_to_hashmap_vec(card.suit, *card, &mut suits);
         }
 
+        let mut grouped_by_suits = suits
+            .into_iter()
+            .map(|(suit, cards)| (cards.len(), suit, cards))
+            .collect::<Vec<_>>();
+        grouped_by_suits.sort_unstable_by(|(a, _, _), (b, _, _)| a.cmp(&b));
+
         let mut grouped_by_values = values.into_iter().collect::<Vec<_>>();
         grouped_by_values.sort_unstable_by(|(a, _), (b, _)| a.cmp(b));
 
@@ -112,7 +118,7 @@ impl From<Vec<Card>> for Hand {
             cards,
             grouped_by_values,
             grouped_by_n_of_a_kind,
-            grouped_by_suits: suits.into_iter().collect::<Vec<_>>(),
+            grouped_by_suits,
         }
     }
 }
@@ -147,6 +153,8 @@ impl Hand {
     }
 
     pub fn full_house(&self) -> Option<(Value, Value)> {
+        // TODO: On a 7-card "hand", we might actually have *two* triplets, which
+        // this doesn't handle properly. We should handle it!
         match self.grouped_by_n_of_a_kind.as_slice() {
             [.., (2, pair_value, _), (3, triplet_value, _)] => Some((*triplet_value, *pair_value)),
             _ => None,
@@ -160,12 +168,21 @@ impl Hand {
         }
     }
 
+    pub fn flush(&self) -> Option<()> {
+        match self.grouped_by_suits.as_slice() {
+            [.., (5, _, _)] => Some(()),
+            _ => None,
+        }
+    }
+
     pub fn find_best_category(&self) -> Option<Category> {
-        // TODO: Need to process Straight, Flush, and StraightFlush!
+        // TODO: Need to process Straight and StraightFlush!
         if let Some(value) = self.four_of_a_kind() {
             Some(Category::FourOfAKind(value))
         } else if let Some((triplet_value, pair_value)) = self.full_house() {
             Some(Category::FullHouse(triplet_value, pair_value))
+        } else if self.flush().is_some() {
+            Some(Category::Flush)
         } else if let Some(value) = self.three_of_a_kind() {
             Some(Category::ThreeOfAKind(value))
         } else if let Some((higher_pair, lower_pair)) = self.two_pair() {
@@ -232,6 +249,13 @@ mod tests {
             hand("kh 3s 3d qs 3h 4d 3c").four_of_a_kind(),
             Some(Value::Three)
         );
+    }
+
+    #[test]
+    fn test_flush_works() {
+        assert_eq!(hand("").flush(), None);
+        assert_eq!(hand("kh 3h 2h 7h 5h").flush(), Some(()));
+        assert_eq!(hand("2s 2d 2h 2c 5h").flush(), None);
     }
 
     #[test]
