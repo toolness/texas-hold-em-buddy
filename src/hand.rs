@@ -91,10 +91,9 @@ impl From<Vec<Card>> for Hand {
 
 impl Hand {
     pub fn highest_value(&self) -> Option<Value> {
-        if let Some((v, _)) = self.grouped_by_values.last() {
-            Some(*v)
-        } else {
-            None
+        match self.grouped_by_values.last() {
+            Some((v, _)) => Some(*v),
+            None => None,
         }
     }
 
