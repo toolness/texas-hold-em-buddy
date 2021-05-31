@@ -1,13 +1,42 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fmt;
 
 use super::card::{Card, Suit, Value};
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Hand {
     cards: Vec<Card>,
     grouped_by_values: Vec<(Value, Vec<Card>)>,
     grouped_by_suits: Vec<(Suit, Vec<Card>)>,
+}
+
+impl PartialOrd for Hand {
+    fn partial_cmp(&self, other: &Hand) -> Option<Ordering> {
+        Some(self.cmp(&other))
+    }
+}
+
+impl Ord for Hand {
+    fn cmp(&self, other: &Hand) -> Ordering {
+        if self.is_empty() {
+            if other.is_empty() {
+                Ordering::Equal
+            } else {
+                Ordering::Less
+            }
+        } else {
+            if other.is_empty() {
+                Ordering::Greater
+            } else {
+                // TODO: Actually compare hands as per the ranking
+                // outlined at https://en.wikipedia.org/wiki/List_of_poker_hands.
+                self.highest_value()
+                    .unwrap()
+                    .cmp(&other.highest_value().unwrap())
+            }
+        }
+    }
 }
 
 fn append_to_hashmap_vec<K: std::hash::Hash + Eq, V>(
@@ -46,12 +75,16 @@ impl From<Vec<Card>> for Hand {
 
 impl Hand {
     pub fn highest_value(&self) -> Option<Value> {
-        if self.cards.len() == 0 {
+        if self.cards.is_empty() {
             None
         } else {
             let (v, _) = self.grouped_by_values[self.grouped_by_values.len() - 1];
             Some(v)
         }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.cards.is_empty()
     }
 }
 
@@ -90,5 +123,17 @@ mod tests {
     fn test_highest_value_works() {
         assert_eq!(hand("").highest_value(), None);
         assert_eq!(hand("2s ah 4d").highest_value(), Some(Value::Ace));
+    }
+
+    #[test]
+    fn test_ord_works_for_empty_hands() {
+        assert!(hand("as") > hand(""));
+        assert!(hand("") < hand("kh"));
+        assert!(hand("").cmp(&hand("")) == std::cmp::Ordering::Equal);
+    }
+
+    #[test]
+    fn test_ord_works_for_high_cards() {
+        assert!(hand("2h as") > hand("kd qs"));
     }
 }
