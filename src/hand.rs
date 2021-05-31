@@ -319,6 +319,8 @@ mod tests {
 
     #[test]
     fn test_find_best_category_works() {
+        assert_eq!(hand("").find_best_category(), None);
+
         assert_eq!(
             hand("2h kd").find_best_category(),
             Some(Category::HighCard(Value::King))
