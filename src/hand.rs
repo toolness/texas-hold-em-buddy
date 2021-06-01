@@ -171,18 +171,24 @@ impl Hand {
         }
     }
 
-    pub fn flush(&self) -> Option<()> {
+    pub fn flush(&self) -> Option<(Suit, Vec<Card>)> {
         match self.grouped_by_suits.as_slice() {
-            [.., (5, _, _)] => Some(()),
+            [.., (n, suit, cards)] => {
+                if *n >= 5 {
+                    Some((*suit, cards.clone()))
+                } else {
+                    None
+                }
+            }
             _ => None,
         }
     }
 
-    pub fn straight(&self) -> Option<Value> {
+    fn get_straight(&self, cards: &Vec<(Value, Vec<Card>)>) -> Option<Value> {
         let mut latest: Option<(Value, u8, usize)> = None;
         let mut has_ace = false;
 
-        for (value, _) in self.grouped_by_values.iter().rev() {
+        for (value, _) in cards.iter().rev() {
             if *value == Value::Ace {
                 has_ace = true;
             }
@@ -205,9 +211,27 @@ impl Hand {
         None
     }
 
+    pub fn straight_flush(&self) -> Option<Value> {
+        if let Some((_, cards)) = self.flush() {
+            self.get_straight(
+                &cards
+                    .into_iter()
+                    .map(|card| (card.value, vec![card]))
+                    .collect::<Vec<_>>(),
+            )
+        } else {
+            None
+        }
+    }
+
+    pub fn straight(&self) -> Option<Value> {
+        self.get_straight(&self.grouped_by_values)
+    }
+
     pub fn find_best_category(&self) -> Option<Category> {
-        // TODO: Need to process StraightFlush!
-        if let Some(value) = self.four_of_a_kind() {
+        if let Some(value) = self.straight_flush() {
+            Some(Category::StraightFlush(value))
+        } else if let Some(value) = self.four_of_a_kind() {
             Some(Category::FourOfAKind(value))
         } else if let Some((triplet_value, pair_value)) = self.full_house() {
             Some(Category::FullHouse(triplet_value, pair_value))
@@ -259,7 +283,7 @@ impl fmt::Display for Hand {
 mod tests {
     use std::cmp::Ordering;
 
-    use super::super::card::Value;
+    use super::super::card::{Suit, Value};
     use super::{Category, Hand};
 
     fn hand(value: &'static str) -> Hand {
@@ -312,14 +336,26 @@ mod tests {
     #[test]
     fn test_flush_works() {
         assert_eq!(hand("").flush(), None);
-        assert_eq!(hand("kh 3h 2h 7h 5h").flush(), Some(()));
+        assert_eq!(hand("kh 3h 2h 7h 5h").flush().unwrap().0, Suit::Hearts);
+        assert_eq!(hand("kh 3h 2h 7h 5h 9h").flush().unwrap().0, Suit::Hearts);
+        assert_eq!(
+            hand("kh 3h 2h 7h 5h 9h 10h").flush().unwrap().0,
+            Suit::Hearts
+        );
         assert_eq!(hand("2s 2d 2h 2c 5h").flush(), None);
+    }
+
+    #[test]
+    fn test_straight_flush_works() {
+        assert_eq!(hand("").straight_flush(), None);
+        assert_eq!(hand("kh 10h jh qh ah").straight_flush(), Some(Value::Ace));
     }
 
     #[test]
     fn test_straight_works() {
         assert_eq!(hand("").straight(), None);
         assert_eq!(hand("2s 3h 4d 5h 6s").straight(), Some(Value::Six));
+        assert_eq!(hand("2s 3h 4d 5h 6s 7d 8h").straight(), Some(Value::Eight));
     }
 
     #[test]
@@ -399,6 +435,11 @@ mod tests {
         assert_eq!(
             hand("5s 5h 5c 5d").find_best_category(),
             Some(Category::FourOfAKind(Value::Five))
+        );
+
+        assert_eq!(
+            hand("2h 3h 4h 5h 6h").find_best_category(),
+            Some(Category::StraightFlush(Value::Six))
         );
     }
 }
