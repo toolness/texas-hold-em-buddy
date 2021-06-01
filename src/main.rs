@@ -18,6 +18,9 @@ Usage:
 Options:
   -h --help     Show this screen.
   --version     Show version.
+
+Examples:
+  poker-fun besthand \"qs 2s 3d jh kc\"
 ";
 
 #[derive(Debug, Deserialize)]
