@@ -83,10 +83,10 @@ pub fn run_texas_hold_em(
 
     assert_eq!(hole_cards.len(), NUM_HOLE_CARDS, "Must have 2 hole cards");
 
-    if src_community_cards.len() >= NUM_COMMUNITY_CARDS {
-        println!("No community cards need to be drawn. Nothing to do!");
-        return;
-    }
+    assert!(
+        src_community_cards.len() <= NUM_COMMUNITY_CARDS,
+        "Must have at most 5 community cards"
+    );
 
     let num_cards_to_draw = NUM_COMMUNITY_CARDS - src_community_cards.len();
 
