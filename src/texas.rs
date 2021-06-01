@@ -64,6 +64,7 @@ pub fn run_texas_hold_em(
     mut random: Random,
 ) {
     let mut hand_categories = Counters(HashMap::new());
+    let mut opponent_hand_categories = Counters(HashMap::new());
     let mut game_outcomes = Counters(HashMap::new());
     let orig_deck = remove_from_deck(
         Card::new_deck(),
@@ -105,6 +106,7 @@ pub fn run_texas_hold_em(
         }
 
         let opponent_hand = Hand::from([community_cards.clone(), opponent_hole_cards].concat());
+        let opponent_cat = opponent_hand.find_best_category().unwrap();
         let hand = Hand::from([community_cards, hole_cards.clone()].concat());
         let cat = hand.find_best_category().unwrap();
 
@@ -113,6 +115,7 @@ pub fn run_texas_hold_em(
             Ordering::Greater => "Win",
             Ordering::Less => "Loss",
         });
+        opponent_hand_categories.increment(category_to_str(&opponent_cat));
         hand_categories.increment(category_to_str(&cat));
     }
 
@@ -122,6 +125,15 @@ pub fn run_texas_hold_em(
     );
 
     hand_categories.print_percentages();
+
+    println!();
+
+    println!(
+        "Opponent hand distribution after randomly drawing {} community cards {} times:\n",
+        num_cards_to_draw, num_iterations
+    );
+
+    opponent_hand_categories.print_percentages();
 
     println!();
 
