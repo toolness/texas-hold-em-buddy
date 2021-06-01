@@ -68,11 +68,16 @@ pub fn run_texas_hold_em(
         [src_community_cards.clone(), hole_cards.clone()].concat(),
     );
 
-    println!(
-        "Hole cards:\n  {}\nCommunity cards:\n  {}\n",
-        Card::vec_to_string(&hole_cards),
-        Card::vec_to_string(&src_community_cards)
-    );
+    println!("Hole cards:\n  {}", Card::vec_to_string(&hole_cards),);
+
+    if !src_community_cards.is_empty() {
+        println!(
+            "Community cards:\n  {}",
+            Card::vec_to_string(&src_community_cards)
+        );
+    }
+
+    println!();
 
     assert_eq!(hole_cards.len(), NUM_HOLE_CARDS, "Must have 2 hole cards");
 
@@ -98,7 +103,7 @@ pub fn run_texas_hold_em(
     }
 
     println!(
-        "Outcome distribution after randomly drawing {} more community cards {} times:\n",
+        "Outcome distribution after randomly drawing {} community cards {} times:\n",
         num_cards_to_draw, num_iterations
     );
 
