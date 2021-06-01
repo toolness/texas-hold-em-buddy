@@ -1,4 +1,5 @@
 // https://en.wikipedia.org/wiki/Linear_congruential_generator
+use chrono::prelude::*;
 
 // These parameters are from Numerical Recipes.
 const MODULUS: u64 = 2u64.pow(32);
@@ -10,6 +11,12 @@ pub struct Random {
 }
 
 impl Random {
+    pub fn new() -> Self {
+        Random {
+            seed: Utc::now().timestamp() as u64,
+        }
+    }
+
     pub fn next(&mut self) -> u64 {
         self.seed = (MULTIPLIER * self.seed + INCREMENT) % MODULUS;
         self.seed

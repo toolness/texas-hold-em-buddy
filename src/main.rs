@@ -3,6 +3,7 @@ use serde::Deserialize;
 mod card;
 mod hand;
 mod random;
+mod texas;
 
 const VERSION: &'static str = "1.0.0";
 
@@ -12,6 +13,7 @@ Perform various poker-related tasks.
 Usage:
   poker-fun test
   poker-fun besthand <hand>
+  poker-fun texas <hand> [--community=<hand>]
   poker-fun --version
   poker-fun (-h | --help)
 
@@ -21,20 +23,23 @@ Options:
 
 Examples:
   poker-fun besthand \"qs 2s 3d jh kc\"
+  poker-fun texas \"10s js\"
+  poker-fun texas \"10s js\" --community=\"qs 9s 3d\"
 ";
 
 #[derive(Debug, Deserialize)]
 struct Args {
     cmd_besthand: bool,
     cmd_test: bool,
+    cmd_texas: bool,
+    flag_community: Option<String>,
     arg_hand: Option<String>,
 }
 
 fn main() {
-    use chrono::prelude::*;
-
     use card::Card;
     use hand::Hand;
+    use random::Random;
 
     let version = VERSION.to_owned();
     let args: Args = docopt::Docopt::new(USAGE)
@@ -59,10 +64,13 @@ fn main() {
         } else {
             println!("The hand you provided is empty.");
         }
+    } else if args.cmd_texas {
+        let hole_cards = Card::try_vec_from(args.arg_hand.unwrap()).unwrap();
+        let community_cards = Card::try_vec_from(args.flag_community.unwrap_or_default()).unwrap();
+
+        texas::run_texas_hold_em(hole_cards, community_cards, 100_000, Random::new());
     } else if args.cmd_test {
-        let mut r = random::Random {
-            seed: Utc::now().timestamp() as u64,
-        };
+        let mut r = Random::new();
         let mut deck = Card::new_deck();
         r.shuffle(&mut deck);
         let hand = Hand::from(deck[0..7].to_owned());
