@@ -369,6 +369,13 @@ mod tests {
     }
 
     #[test]
+    fn test_ord_considers_kickers() {
+        // https://en.wikipedia.org/wiki/Kicker_(poker)
+        assert!(hand("qs qc 10s 5s 3s") > hand("qh qd 10h 4h 3s"));
+        assert!(hand("qs qc 10s 5s 3s") < hand("qh qd kh 4h 3s"));
+    }
+
+    #[test]
     fn test_ord_works_for_empty_hands() {
         assert!(hand("as") > hand(""));
         assert!(hand("") < hand("kh"));
