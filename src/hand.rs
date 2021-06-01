@@ -13,7 +13,7 @@ pub enum Category {
     TwoPair(Value, Value),
     ThreeOfAKind(Value),
     Straight(Value),
-    Flush,
+    Flush(Value, Value, Value, Value, Value),
     FullHouse(Value, Value),
     FourOfAKind(Value),
     StraightFlush(Value),
@@ -34,7 +34,7 @@ impl Category {
         match self {
             Category::StraightFlush(_)
             | Category::FullHouse(_, _)
-            | Category::Flush
+            | Category::Flush(_, _, _, _, _)
             | Category::Straight(_) => vec![],
             Category::FourOfAKind(value) => get_kickers(hand, vec![*value], 1),
             Category::ThreeOfAKind(value) => get_kickers(hand, vec![*value], 2),
@@ -269,8 +269,17 @@ impl Hand {
             Some(Category::FourOfAKind(value))
         } else if let Some((triplet_value, pair_value)) = self.full_house() {
             Some(Category::FullHouse(triplet_value, pair_value))
-        } else if self.flush().is_some() {
-            Some(Category::Flush)
+        } else if let Some((_suit, all_cards)) = self.flush() {
+            let cards = all_cards
+                .iter()
+                .rev()
+                .take(5)
+                .map(|card| card.value)
+                .collect::<Vec<_>>();
+
+            Some(Category::Flush(
+                cards[0], cards[1], cards[2], cards[3], cards[4],
+            ))
         } else if let Some(value) = self.straight() {
             Some(Category::Straight(value))
         } else if let Some(value) = self.three_of_a_kind() {
@@ -482,8 +491,14 @@ mod tests {
         );
 
         assert_eq!(
-            hand("2h 3h 4h kh 10h").find_best_category(),
-            Some(Category::Flush)
+            hand("2h 3h 4h kh 10h 8h qs").find_best_category(),
+            Some(Category::Flush(
+                Value::King,
+                Value::Ten,
+                Value::Eight,
+                Value::Four,
+                Value::Three,
+            ))
         );
 
         assert_eq!(
