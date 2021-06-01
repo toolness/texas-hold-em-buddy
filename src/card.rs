@@ -128,6 +128,17 @@ impl Card {
         Card { value, suit }
     }
 
+    /// Convert a Vector of Cards to a comma-separated string.
+    /// Ideally we'd just implement fmt::Display for a Vec<Card> but
+    /// this results in a "impl does not reference any types defined in
+    /// this crate" error.
+    pub fn vec_to_string(v: &Vec<Card>) -> String {
+        v.iter()
+            .map(|card| format!("{}", card))
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+
     pub fn new_deck() -> Vec<Self> {
         let mut result: Vec<Self> = Vec::new();
 

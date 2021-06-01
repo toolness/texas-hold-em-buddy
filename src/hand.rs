@@ -316,9 +316,7 @@ impl std::str::FromStr for Hand {
 
 impl fmt::Display for Hand {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let cards_vec: Vec<String> = self.cards.iter().map(|card| format!("{}", card)).collect();
-
-        write!(f, "{}", cards_vec.join(", "))
+        write!(f, "{}", Card::vec_to_string(&self.cards))
     }
 }
 

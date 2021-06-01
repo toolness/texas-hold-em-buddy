@@ -45,10 +45,12 @@ fn main() {
         let opt_cat = hand.find_best_category();
         if let Some(cat) = opt_cat {
             let kickers = cat.get_kickers(&hand);
-            println!(
-                "The best hand for\n  {}\nis\n  {:?}\nwith kickers\n  {:?}.",
-                hand, cat, kickers
-            );
+            println!("The best hand for\n  {}\nis\n  {:?}", hand, cat);
+            if kickers.is_empty() {
+                println!("with no kickers.");
+            } else {
+                println!("with kickers\n  {}.", Card::vec_to_string(&kickers));
+            }
         } else {
             println!("The hand you provided is empty.");
         }
