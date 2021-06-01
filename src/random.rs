@@ -15,7 +15,15 @@ impl Random {
         self.seed
     }
 
-    pub fn next_float(&mut self) -> f64 {
-        self.next() as f64 / MODULUS as f64
+    pub fn shuffle<T>(&mut self, v: &mut Vec<T>) {
+        let mut i = 0;
+        let attempts = v.len() * 2;
+        for _ in 0..attempts {
+            let random_idx = self.next() as usize % v.len();
+            if i != random_idx {
+                v.swap(i, random_idx);
+            }
+            i = (i + 1) % v.len();
+        }
     }
 }

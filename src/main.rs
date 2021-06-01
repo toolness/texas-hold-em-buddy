@@ -31,6 +31,8 @@ struct Args {
 }
 
 fn main() {
+    use chrono::prelude::*;
+
     use card::Card;
     use hand::Hand;
 
@@ -58,12 +60,13 @@ fn main() {
             println!("The hand you provided is empty.");
         }
     } else if args.cmd_test {
-        let mut r = random::Random { seed: 15 };
-        let deck = Card::new_deck();
-        let hand = "kd ac 2s".parse::<Hand>().unwrap();
-        println!("Here's a random number: {}", r.next_float());
-        println!("Here's a deck with {} cards: {:?}", deck.len(), deck);
-        println!("Here's a hand: {}", hand);
-        println!("Its best category is: {:?}", hand.find_best_category());
+        let mut r = random::Random {
+            seed: Utc::now().timestamp() as u64,
+        };
+        let mut deck = Card::new_deck();
+        r.shuffle(&mut deck);
+        let hand = Hand::from(deck[0..7].to_owned());
+        println!("Here's a hand:\n  {}", hand);
+        println!("Its best category is:\n  {:?}", hand.find_best_category());
     }
 }
