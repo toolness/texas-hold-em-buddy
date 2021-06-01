@@ -388,6 +388,13 @@ mod tests {
             hand("as kh qc js 3c ah 8s").cmp(&hand("as kh qc js 3c ac 7s")),
             Ordering::Equal
         );
+
+        // Pathological case where the common cards include a four-of-a-kind,
+        // and both hands are ultimately 2-2-2-2-A.
+        assert_eq!(
+            hand("2s 2h 2c 2d 3c ah 8s").cmp(&hand("2s 2h 2c 2d 3c ac 7s")),
+            Ordering::Equal
+        );
     }
 
     #[test]
