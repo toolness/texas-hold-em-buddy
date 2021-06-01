@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::ops::Deref;
 
@@ -62,7 +63,8 @@ pub fn run_texas_hold_em(
     num_iterations: usize,
     mut random: Random,
 ) {
-    let mut outcomes = Counters(HashMap::new());
+    let mut hand_categories = Counters(HashMap::new());
+    let mut game_outcomes = Counters(HashMap::new());
     let orig_deck = remove_from_deck(
         Card::new_deck(),
         [src_community_cards.clone(), hole_cards.clone()].concat(),
@@ -91,21 +93,42 @@ pub fn run_texas_hold_em(
     for _ in 0..num_iterations {
         let mut deck = orig_deck.clone();
         let mut community_cards = src_community_cards.clone();
+        let mut opponent_hole_cards = vec![];
         random.shuffle(&mut deck);
+
+        for _ in 0..NUM_COMMUNITY_CARDS {
+            opponent_hole_cards.push(deck.pop().unwrap());
+        }
 
         for _ in 0..num_cards_to_draw {
             community_cards.push(deck.pop().unwrap());
         }
 
+        let opponent_hand = Hand::from([community_cards.clone(), opponent_hole_cards].concat());
         let hand = Hand::from([community_cards, hole_cards.clone()].concat());
         let cat = hand.find_best_category().unwrap();
-        outcomes.increment(category_to_str(&cat));
+
+        game_outcomes.increment(match hand.cmp(&opponent_hand) {
+            Ordering::Equal => "Tie",
+            Ordering::Greater => "Win",
+            Ordering::Less => "Loss",
+        });
+        hand_categories.increment(category_to_str(&cat));
     }
 
     println!(
-        "Outcome distribution after randomly drawing {} community cards {} times:\n",
+        "Hand distribution after randomly drawing {} community cards {} times:\n",
         num_cards_to_draw, num_iterations
     );
 
-    outcomes.print_percentages();
+    hand_categories.print_percentages();
+
+    println!();
+
+    println!(
+        "Outcome distribution after playing against one opponent {} times:\n",
+        num_iterations
+    );
+
+    game_outcomes.print_percentages();
 }
