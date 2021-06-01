@@ -422,6 +422,12 @@ mod tests {
     }
 
     #[test]
+    fn test_ord_works_with_flushes() {
+        // https://en.wikipedia.org/wiki/List_of_poker_hands#Flush
+        assert!(hand("qs 2s 4s 6s 8s") > hand("qh 2h 4h 6h 7h"));
+    }
+
+    #[test]
     fn test_ord_works_for_empty_hands() {
         assert!(hand("as") > hand(""));
         assert!(hand("") < hand("kh"));
