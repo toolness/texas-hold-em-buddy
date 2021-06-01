@@ -55,11 +55,21 @@ impl Ord for Hand {
                 }
 
                 // It looks like the two hands are tied, so we'll try to break the
-                // tie by seeing if one has a higher card.
+                // tie by looking at kickers.
+                //
+                // I *think* this is equivalent to what's described in
+                // https://en.wikipedia.org/wiki/Kicker_(poker). However, we're just
+                // comparing the top 5 cards of each hand and I'm not sure if that's
+                // technically the same thing as looking at the kickers.
+                let mut i = 0;
                 for (card, other_card) in self.cards.iter().rev().zip(other.cards.iter().rev()) {
                     let cmp = card.cmp(other_card);
                     if cmp != Ordering::Equal {
                         return cmp;
+                    }
+                    i += 1;
+                    if i >= 5 {
+                        break;
                     }
                 }
                 Ordering::Equal
@@ -373,6 +383,11 @@ mod tests {
         // https://en.wikipedia.org/wiki/Kicker_(poker)
         assert!(hand("qs qc 10s 5s 3s") > hand("qh qd 10h 4h 3s"));
         assert!(hand("qs qc 10s 5s 3s") < hand("qh qd kh 4h 3s"));
+        assert!(hand("as kh 6c 5s 4c ah 8s") > hand("as kh 6c 5s 4c ac 7s"));
+        assert_eq!(
+            hand("as kh qc js 3c ah 8s").cmp(&hand("as kh qc js 3c ac 7s")),
+            Ordering::Equal
+        );
     }
 
     #[test]
