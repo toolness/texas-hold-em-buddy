@@ -4,7 +4,7 @@ use std::fmt;
 
 use super::card::{Card, Suit, Value};
 
-#[derive(Debug, PartialOrd, PartialEq, Eq, Ord)]
+#[derive(Debug, PartialOrd, PartialEq, Eq, Ord, Copy, Clone)]
 /// This is ordered as per the listing here:
 /// https://en.wikipedia.org/wiki/List_of_poker_hands
 pub enum Category {
@@ -30,7 +30,7 @@ fn get_kickers(hand: &Hand, non_kicker_values: Vec<Value>, max_len: usize) -> Ve
 }
 
 impl Category {
-    fn get_kickers(&self, hand: &Hand) -> Vec<Card> {
+    pub fn get_kickers(&self, hand: &Hand) -> Vec<Card> {
         match self {
             Category::StraightFlush(_)
             | Category::FullHouse(_, _)

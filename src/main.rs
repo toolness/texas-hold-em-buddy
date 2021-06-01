@@ -1,16 +1,64 @@
+use serde::Deserialize;
+
 mod card;
 mod hand;
 mod random;
+
+const VERSION: &'static str = "1.0.0";
+
+const USAGE: &'static str = "
+Perform various poker-related tasks.
+
+Usage:
+  poker-fun test
+  poker-fun besthand <hand>
+  poker-fun --version
+  poker-fun (-h | --help)
+
+Options:
+  -h --help     Show this screen.
+  --version     Show version.
+";
+
+#[derive(Debug, Deserialize)]
+struct Args {
+    cmd_besthand: bool,
+    cmd_test: bool,
+    arg_hand: Option<String>,
+}
 
 fn main() {
     use card::Card;
     use hand::Hand;
 
-    let mut r = random::Random { seed: 15 };
-    let deck = Card::new_deck();
-    let hand = "kd ac 2s".parse::<Hand>().unwrap();
-    println!("Here's a random number: {}", r.next_float());
-    println!("Here's a deck with {} cards: {:?}", deck.len(), deck);
-    println!("Here's a hand: {}", hand);
-    println!("Its best category is: {:?}", hand.find_best_category());
+    let version = VERSION.to_owned();
+    let args: Args = docopt::Docopt::new(USAGE)
+        .and_then(|d| d.version(Some(version)).deserialize())
+        .unwrap_or_else(|e| e.exit());
+
+    if args.cmd_besthand {
+        let hand = args
+            .arg_hand
+            .unwrap()
+            .parse::<Hand>()
+            .expect("Hand argument should be valid");
+        let opt_cat = hand.find_best_category();
+        if let Some(cat) = opt_cat {
+            let kickers = cat.get_kickers(&hand);
+            println!(
+                "The best hand for\n  {}\nis\n  {:?}\nwith kickers\n  {:?}.",
+                hand, cat, kickers
+            );
+        } else {
+            println!("The hand you provided is empty.");
+        }
+    } else if args.cmd_test {
+        let mut r = random::Random { seed: 15 };
+        let deck = Card::new_deck();
+        let hand = "kd ac 2s".parse::<Hand>().unwrap();
+        println!("Here's a random number: {}", r.next_float());
+        println!("Here's a deck with {} cards: {:?}", deck.len(), deck);
+        println!("Here's a hand: {}", hand);
+        println!("Its best category is: {:?}", hand.find_best_category());
+    }
 }
