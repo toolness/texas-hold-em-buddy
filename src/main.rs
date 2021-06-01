@@ -13,7 +13,7 @@ Perform various poker-related tasks.
 Usage:
   poker-fun test
   poker-fun besthand <hand>
-  poker-fun texas <hand> [--community=<hand>]
+  poker-fun texas <hand> [--community=<hand>] [--times=<times>]
   poker-fun --version
   poker-fun (-h | --help)
 
@@ -33,6 +33,7 @@ struct Args {
     cmd_test: bool,
     cmd_texas: bool,
     flag_community: Option<String>,
+    flag_times: Option<usize>,
     arg_hand: Option<String>,
 }
 
@@ -67,8 +68,9 @@ fn main() {
     } else if args.cmd_texas {
         let hole_cards = Card::try_vec_from(args.arg_hand.unwrap()).unwrap();
         let community_cards = Card::try_vec_from(args.flag_community.unwrap_or_default()).unwrap();
+        let times = args.flag_times.unwrap_or(100_000);
 
-        texas::run_texas_hold_em(hole_cards, community_cards, 100_000, Random::new());
+        texas::run_texas_hold_em(hole_cards, community_cards, times, Random::new());
     } else if args.cmd_test {
         let mut r = Random::new();
         let mut deck = Card::new_deck();
