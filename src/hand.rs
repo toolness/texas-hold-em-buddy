@@ -19,6 +19,34 @@ pub enum Category {
     StraightFlush(Value),
 }
 
+fn get_kickers(hand: &Hand, non_kicker_values: Vec<Value>, max_len: usize) -> Vec<Card> {
+    hand.cards
+        .iter()
+        .rev()
+        .filter(|card| !non_kicker_values.contains(&card.value))
+        .take(max_len)
+        .map(|card| *card)
+        .collect::<Vec<_>>()
+}
+
+impl Category {
+    fn get_kickers(&self, hand: &Hand) -> Vec<Card> {
+        match self {
+            Category::StraightFlush(_)
+            | Category::FullHouse(_, _)
+            | Category::Flush
+            | Category::Straight(_) => vec![],
+            Category::FourOfAKind(value) => get_kickers(hand, vec![*value], 1),
+            Category::ThreeOfAKind(value) => get_kickers(hand, vec![*value], 2),
+            Category::OnePair(value) => get_kickers(hand, vec![*value], 3),
+            Category::HighCard(value) => get_kickers(hand, vec![*value], 4),
+            Category::TwoPair(higher_pair, lower_pair) => {
+                get_kickers(hand, vec![*higher_pair, *lower_pair], 1)
+            }
+        }
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct Hand {
     cards: Vec<Card>,
@@ -57,19 +85,15 @@ impl Ord for Hand {
                 // It looks like the two hands are tied, so we'll try to break the
                 // tie by looking at kickers.
                 //
-                // I *think* this is equivalent to what's described in
-                // https://en.wikipedia.org/wiki/Kicker_(poker). However, we're just
-                // comparing the top 5 cards of each hand and I'm not sure if that's
-                // technically the same thing as looking at the kickers.
-                let mut i = 0;
-                for (card, other_card) in self.cards.iter().rev().zip(other.cards.iter().rev()) {
+                // This should be equivalent to what's described in
+                // https://en.wikipedia.org/wiki/Kicker_(poker).
+                let kickers = best.get_kickers(self);
+                let other_kickers = other_best.get_kickers(other);
+
+                for (card, other_card) in kickers.iter().zip(other_kickers.iter()) {
                     let cmp = card.cmp(other_card);
                     if cmp != Ordering::Equal {
                         return cmp;
-                    }
-                    i += 1;
-                    if i >= 5 {
-                        break;
                     }
                 }
                 Ordering::Equal
