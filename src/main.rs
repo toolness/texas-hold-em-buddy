@@ -102,5 +102,8 @@ fn main() {
         let hand = Hand::from(deck[0..7].to_owned());
         println!("Here's a hand:\n  {}", hand);
         println!("Its best category is:\n  {:?}", hand.find_best_category());
+    } else {
+        println!("Please specify a subcommand. Run 'theb help' for more details.");
+        std::process::exit(1);
     }
 }
