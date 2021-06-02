@@ -54,8 +54,9 @@ fn remove_from_deck(mut deck: Vec<Card>, cards: Vec<Card>) -> Vec<Card> {
     deck
 }
 
-const NUM_COMMUNITY_CARDS: usize = 5;
-const NUM_HOLE_CARDS: usize = 2;
+pub const NUM_COMMUNITY_CARDS: usize = 5;
+pub const NUM_HOLE_CARDS: usize = 2;
+pub const NUM_TOTAL_CARDS: usize = NUM_COMMUNITY_CARDS + NUM_HOLE_CARDS;
 
 pub fn run_texas_hold_em(
     hole_cards: Vec<Card>,
