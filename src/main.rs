@@ -8,11 +8,11 @@ mod hand;
 mod random;
 mod texas;
 
-const AFTER_HELP: &'static str = "
-Examples:
-  theb besthand \"qs 2s 3d jh kc\"
-  theb play \"10s js\"
-  theb play \"10s js\" \"qs 9s 3d\"
+const AFTER_HELP: &'static str = "\
+EXAMPLES:
+    theb besthand \"qs 2s 3d jh kc\"
+    theb play \"10s js\"
+    theb play \"10s js\" \"qs 9s 3d\"
 ";
 
 fn main() {
@@ -38,7 +38,7 @@ fn main() {
         .subcommand(
             SubCommand::with_name("play")
                 .about(
-                    "Attempts to simulate play with the given cards and reports probable outcomes.",
+                    "Attempts to simulate play with the given cards and reports probable outcomes",
                 )
                 .arg(
                     Arg::with_name("HOLE_CARDS")
@@ -62,7 +62,7 @@ fn main() {
                         .takes_value(true),
                 ),
         )
-        .subcommand(SubCommand::with_name("test").about("Runs a manual test."))
+        .subcommand(SubCommand::with_name("test").about("Runs a manual test"))
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("besthand") {
