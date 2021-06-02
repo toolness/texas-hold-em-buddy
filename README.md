@@ -15,5 +15,5 @@ You will need [Rust](https://www.rust-lang.org/).
 
 ```
 cargo install --path .
-poker-fun --help
+theb --help
 ```
