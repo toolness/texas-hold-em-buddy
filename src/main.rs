@@ -1,55 +1,73 @@
-use serde::Deserialize;
+#[macro_use(value_t)]
+extern crate clap;
+
+use clap::{App, Arg, SubCommand};
 
 mod card;
 mod hand;
 mod random;
 mod texas;
 
-const VERSION: &'static str = "1.0.0";
-
-const USAGE: &'static str = "
-Perform various poker-related tasks.
-
-Usage:
-  poker-fun test
-  poker-fun besthand <hand>
-  poker-fun texas <hand> [--community=<hand>] [--times=<times>]
-  poker-fun --version
-  poker-fun (-h | --help)
-
-Options:
-  -h --help     Show this screen.
-  --version     Show version.
-
+const AFTER_HELP: &'static str = "
 Examples:
-  poker-fun besthand \"qs 2s 3d jh kc\"
-  poker-fun texas \"10s js\"
-  poker-fun texas \"10s js\" --community=\"qs 9s 3d\"
+  theb besthand \"qs 2s 3d jh kc\"
+  theb play \"10s js\"
+  theb play \"10s js\" \"qs 9s 3d\"
 ";
-
-#[derive(Debug, Deserialize)]
-struct Args {
-    cmd_besthand: bool,
-    cmd_test: bool,
-    cmd_texas: bool,
-    flag_community: Option<String>,
-    flag_times: Option<usize>,
-    arg_hand: Option<String>,
-}
 
 fn main() {
     use card::Card;
     use hand::Hand;
     use random::Random;
 
-    let version = VERSION.to_owned();
-    let args: Args = docopt::Docopt::new(USAGE)
-        .and_then(|d| d.version(Some(version)).deserialize())
-        .unwrap_or_else(|e| e.exit());
+    let matches = App::new("Texas Hold 'Em Buddy")
+        .version("1.0")
+        .author("Atul Varma <varmaa@gmail.com>")
+        .about("An assistant for analyzing Texas Hold 'Em games")
+        .after_help(AFTER_HELP)
+        .subcommand(
+            SubCommand::with_name("besthand")
+                .about("Attempts to deduce the best hand from a list of cards")
+                .arg(
+                    Arg::with_name("CARDS")
+                        .help("List of cards")
+                        .required(true)
+                        .index(1),
+                ),
+        )
+        .subcommand(
+            SubCommand::with_name("play")
+                .about(
+                    "Attempts to simulate play with the given cards and reports probable outcomes.",
+                )
+                .arg(
+                    Arg::with_name("HOLE_CARDS")
+                        .help("List of two hole cards")
+                        .required(true)
+                        .index(1),
+                )
+                .arg(
+                    Arg::with_name("COMMUNITY_CARDS")
+                        .help("List of up to five community cards")
+                        .required(false)
+                        .index(2),
+                )
+                .arg(
+                    Arg::with_name("times")
+                        .short("t")
+                        .long("times")
+                        .value_name("N")
+                        .default_value("100000")
+                        .help("Number of times to simulate play")
+                        .takes_value(true),
+                ),
+        )
+        .subcommand(SubCommand::with_name("test").about("Runs a manual test."))
+        .get_matches();
 
-    if args.cmd_besthand {
-        let hand = args
-            .arg_hand
+    if let Some(matches) = matches.subcommand_matches("besthand") {
+        let hand = matches
+            .value_of("CARDS")
             .unwrap()
             .parse::<Hand>()
             .expect("Hand argument should be valid");
@@ -65,13 +83,14 @@ fn main() {
         } else {
             println!("The hand you provided is empty.");
         }
-    } else if args.cmd_texas {
-        let hole_cards = Card::try_vec_from(args.arg_hand.unwrap()).unwrap();
-        let community_cards = Card::try_vec_from(args.flag_community.unwrap_or_default()).unwrap();
-        let times = args.flag_times.unwrap_or(100_000);
+    } else if let Some(matches) = matches.subcommand_matches("play") {
+        let hole_cards = Card::try_vec_from(matches.value_of("HOLE_CARDS").unwrap()).unwrap();
+        let community_cards =
+            Card::try_vec_from(matches.value_of("COMMUNITY_CARDS").unwrap_or_default()).unwrap();
+        let times = value_t!(matches.value_of("times"), usize).unwrap_or_else(|e| e.exit());
 
         texas::run_texas_hold_em(hole_cards, community_cards, times, Random::new());
-    } else if args.cmd_test {
+    } else if let Some(_) = matches.subcommand_matches("test") {
         let mut r = Random::new();
         let mut deck = Card::new_deck();
         r.shuffle(&mut deck);
