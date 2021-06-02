@@ -1,13 +1,29 @@
-This is a simple tool to perform analysis of [Texas Hold 'Em][the] hands.
+**Texas Hold 'Em Buddy** is a simple tool to perform analysis of
+[Texas Hold 'Em][the] games.
 
 [the]: https://en.wikipedia.org/wiki/Texas_hold_'em
 
 ## Motivation
 
 I was reading Maria Konnikova's [The Biggest Bluff][mk] and wanted an excuse to
-write Rust, as well as obtain a better understanding of how Texas Hold 'Em works.
+write Rust, obtain a better understanding of how Texas Hold 'Em works, and win
+[Telltale Texas Hold'em][telltale].
+
+So, this project was undertaken for personal edification. As such, it probably
+has bugs, and there are probably plenty of existing tools out there that are
+better than it.
 
 [mk]: https://www.mariakonnikova.com/books/the-biggest-bluff/
+[telltale]: https://en.wikipedia.org/wiki/Telltale_Texas_Hold%27em
+
+## Approach
+
+The tool takes a [Monte Carlo][] approach to analyzing games: that is, instead
+of calculating theoretical probabilities, it takes a starting state of
+hole and/or community cards, randomly plays out a large number of games, and
+reports back on the probability distribution of the outcomes.
+
+[monte carlo]: https://en.wikipedia.org/wiki/Monte_Carlo_method
 
 ## Description
 
@@ -16,7 +32,7 @@ Here's the command-line help:
 ```
 Texas Hold 'Em Buddy 1.0
 Atul Varma <varmaa@gmail.com>
-An assistant for analyzing Texas Hold 'Em games
+A tool for analyzing Texas Hold 'Em games
 
 USAGE:
     theb [SUBCOMMAND]

@@ -33,7 +33,7 @@ fn main() {
     let matches = App::new("Texas Hold 'Em Buddy")
         .version("1.0")
         .author("Atul Varma <varmaa@gmail.com>")
-        .about("An assistant for analyzing Texas Hold 'Em games")
+        .about("A tool for analyzing Texas Hold 'Em games")
         .after_help(AFTER_HELP)
         .subcommand(
             SubCommand::with_name("besthand")
