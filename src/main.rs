@@ -76,17 +76,15 @@ fn main() {
     if let Some(matches) = matches.subcommand_matches("besthand") {
         let cards = values_t!(matches.values_of("CARD"), Card).unwrap_or_else(|e| e.exit());
         let hand = Hand::from(cards);
-        let opt_cat = hand.find_best_category();
-        if let Some(cat) = opt_cat {
-            let kickers = cat.get_kickers(&hand);
-            println!("The best hand for\n  {}\nis\n  {:?}", hand, cat);
-            if kickers.is_empty() {
-                println!("with no kickers.");
-            } else {
-                println!("with kickers\n  {}.", Card::vec_to_string(&kickers));
-            }
+        let cat = hand
+            .find_best_category()
+            .expect("clap ensures we have a non-empty hand");
+        let kickers = cat.get_kickers(&hand);
+        println!("The best hand for\n  {}\nis\n  {:?}", hand, cat);
+        if kickers.is_empty() {
+            println!("with no kickers.");
         } else {
-            println!("The hand you provided is empty.");
+            println!("with kickers\n  {}.", Card::vec_to_string(&kickers));
         }
     } else if let Some(matches) = matches.subcommand_matches("play") {
         let cards = values_t!(matches.values_of("CARD"), Card).unwrap_or_else(|e| e.exit());
